@@ -26,7 +26,7 @@ export default function Home() {
   const handleIdRequest = async (e) => {
     e.preventDefault();
 
-    const res = await fetch(`http://localhost:5000/api/multiply/${id}`, {
+    const res = await fetch(`https://tech0-gen-8-step3-testapp-py1-8.azure@websites.net/api/multiply/${id}`, {
       method: 'GET',
     });
     const data = await res.json();
