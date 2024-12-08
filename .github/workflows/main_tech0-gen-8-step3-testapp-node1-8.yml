@@ -1,6 +1,23 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
+
+steps:
+  - name: Install dependencies
+    run: |
+      # 基本パッケージのインストール
+      npm install lucide-react
+      npm install @radix-ui/react-slot class-variance-authority clsx tailwind-merge
+      
+      # shadcn/uiの初期設定
+      npm install -D @types/node autoprefixer postcss tailwindcss
+      npx shadcn-ui@latest init -y
+      
+      # 必要なコンポーネントのインストール
+      npx shadcn-ui@latest add input
+      npx shadcn-ui@latest add button
+      npx shadcn-ui@latest add card
+
 name: Build and deploy Node.js app to Azure Web App - tech0-gen-8-step3-testapp-node1-8
 
 on:
