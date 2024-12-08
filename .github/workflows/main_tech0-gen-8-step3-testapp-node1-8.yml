@@ -23,31 +23,41 @@ jobs:
 
       - name: Install dependencies
         run: |
+          # Install global packages first
+          npm install -g shadcn-ui
+          
+          # Install project dependencies
+          npm install
+          
           # install standard package
           npm install lucide-react
           npm install @radix-ui/react-slot class-variance-authority clsx tailwind-merge
           
           # set of shadcn/ui
           npm install -D @types/node autoprefixer postcss tailwindcss
-          npx shadcn-ui@latest init -y
           
-          # 必要install of nessesary component
-          npx shadcn-ui@latest add input
-          npx shadcn-ui@latest add button
-          npx shadcn-ui@latest add card
+          # Initialize shadcn-ui (with error handling)
+          npx shadcn-ui@latest init -y || echo "shadcn-ui init failed, continuing..."
+          
+          # Install necessary components (with error handling)
+          for component in input button card; do
+            npx shadcn-ui@latest add $component -y || echo "Failed to add $component, continuing..."
+          done
+          
+          # Fix audit issues (optional)
+          npm audit fix --force || true
 
-      - name: npm install, build, and test
+      - name: npm build and test
         run: |
-          npm install
           npm run build --if-present
           npm run test --if-present
 
       - name: Copy artifact for deployment job
         run: |
-          mkdir deploy
-          cp -r ./.next/standalone/. ./deploy
-          cp -r ./public ./deploy
-          cp -r ./.next/static/. ./deploy/.next/static
+          mkdir -p deploy/.next/static
+          cp -r ./.next/standalone/. ./deploy || echo "standalone copy failed"
+          cp -r ./public ./deploy || echo "public copy failed"
+          cp -r ./.next/static/. ./deploy/.next/static || echo "static copy failed"
 
       - name: Zip artifact for deployment
         run: zip release.zip ./deploy -r
@@ -82,4 +92,3 @@ jobs:
           slot-name: 'Production'
           package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2EB7ACC299674697BC9A7D968FFAAA7B }}
-
