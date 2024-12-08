@@ -1,105 +1,160 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { Send } from 'lucide-react';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export default function Home() {
-
-  //GETリクエストを送信
   const [getResponse, setGetResponse] = useState('');
-
-  const handleGetRequest = async () => {
-    const res = await fetch('https://tech0-gen-8-step3-testapp-py1-8.azurewebsites.net/api/hello', {
-      method: 'GET',
-    });
-    const data = await res.json();
-
-
-    // GETリクエストの結果をコンソールに表示
-    console.log("GETリクエストの結果:", data.message);
-
-    setGetResponse(data.message);
-  };
-
-  //動的なGETリクエストの送信
   const [id, setId] = useState('');
   const [idResponse, setIdResponse] = useState('');
-
-  // IDを指定してGETリクエストを送信
-  const handleIdRequest = async (e) => {
-    e.preventDefault();
-
-    const res = await fetch(`https://tech0-gen-8-step3-testapp-py1-8.azurewebsites.net/api/multiply/${id}`, {
-      method: 'GET',
-    });
-    const data = await res.json();
-
-    // IDリクエストの結果をコンソールに表示
-    console.log("IDリクエストの結果:", data.doubled_value);
-
-    setIdResponse(data.doubled_value);
-  };
-
-  //POSTリクエストを送信
   const [input, setInput] = useState('');
   const [postResponse, setPostResponse] = useState('');
+  const [isLoading, setIsLoading] = useState({
+    get: false,
+    id: false,
+    post: false
+  });
+
+  const handleGetRequest = async () => {
+    setIsLoading(prev => ({ ...prev, get: true }));
+    try {
+      const res = await fetch('https://tech0-gen-8-step3-testapp-py1-8.azurewebsites.net/api/hello');
+      const data = await res.json();
+      console.log("GETリクエストの結果:", data.message);
+      setGetResponse(data.message);
+    } catch (error) {
+      console.error("エラーが発生しました:", error);
+    } finally {
+      setIsLoading(prev => ({ ...prev, get: false }));
+    }
+  };
+
+  const handleIdRequest = async (e) => {
+    e.preventDefault();
+    if (!id) return;
+    
+    setIsLoading(prev => ({ ...prev, id: true }));
+    try {
+      const res = await fetch(`https://tech0-gen-8-step3-testapp-py1-8.azurewebsites.net/api/multiply/${id}`);
+      const data = await res.json();
+      console.log("IDリクエストの結果:", data.doubled_value);
+      setIdResponse(data.doubled_value);
+    } catch (error) {
+      console.error("エラーが発生しました:", error);
+    } finally {
+      setIsLoading(prev => ({ ...prev, id: false }));
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!input) return;
 
-    //入力されたデータをコンソールに表示
-    console.log("入力情報:", input);
-
-    const res = await fetch('https://tech0-gen-8-step3-testapp-py1-8.azurewebsites.net/api/echo', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ "message":input }),
-
-    });
-    console.log(JSON.stringify({ "message":input }));
-    const data = await res.json();
-
-    //バックエンドからのレスポンスをコンソールに表示
-    console.log("Backendからのお返事:", data.message);
-
-    setPostResponse(data.message);
+    setIsLoading(prev => ({ ...prev, post: true }));
+    try {
+      const res = await fetch('https://tech0-gen-8-step3-testapp-py1-8.azurewebsites.net/api/echo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: input }),
+      });
+      const data = await res.json();
+      console.log("Backendからのお返事:", data.message);
+      setPostResponse(data.message);
+    } catch (error) {
+      console.error("エラーが発生しました:", error);
+    } finally {
+      setIsLoading(prev => ({ ...prev, post: false }));
+    }
   };
 
-
   return (
-    <div>
+    <div className="container mx-auto p-4 max-w-3xl">
+      <h1 className="text-3xl font-bold mb-8 text-center">Next.jsとFlaskの連携アプリ</h1>
 
-      <h1>Next.jsとFlaskの連携アプリ</h1>
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>シンプルなGETリクエスト</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={handleGetRequest}
+              disabled={isLoading.get}
+              className="w-full"
+            >
+              {isLoading.get ? "送信中..." : "GETリクエストを送信"}
+            </Button>
+            {getResponse && (
+              <p className="mt-4 p-3 bg-slate-100 rounded-md">
+                サーバーからの応答: {getResponse}
+              </p>
+            )}
+          </CardContent>
+        </Card>
 
-      <h2>GETリクエストを送信</h2>
-      <button onClick={handleGetRequest}>GETリクエストを送信</button>
-      {getResponse && <p>サーバーからのGET応答: {getResponse}</p>}
+        <Card>
+          <CardHeader>
+            <CardTitle>IDを指定したGETリクエスト</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleIdRequest} className="space-y-4">
+              <Input
+                type="number"
+                value={id}
+                onChange={(e) => setId(e.target.value)}
+                placeholder="IDを入力してください"
+              />
+              <Button 
+                type="submit"
+                disabled={isLoading.id || !id}
+                className="w-full"
+              >
+                {isLoading.id ? "送信中..." : "送信"}
+              </Button>
+            </form>
+            {idResponse && (
+              <p className="mt-4 p-3 bg-slate-100 rounded-md">
+                Flaskからの応答: {idResponse}
+              </p>
+            )}
+          </CardContent>
+        </Card>
 
-      <h2>IDを指定してGETリクエストを送信</h2>
-      <form onSubmit={handleIdRequest}>
-        <input
-          type="number"
-          value={id}
-          onChange={(e) => setId(e.target.value)}
-          placeholder="IDを入力してください"
-        />
-        <button type="submit">送信</button>
-      </form>
-      {idResponse && <p>Flaskからの応答: {idResponse}</p>}
-
-      <h2>POSTリクエストを送信</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={input}
-
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="テキストを入力してください"
-        />
-
-        <button type="submit">送信</button>
-      </form>
-      {postResponse && <p>FlaskからのPOST応答: {postResponse}</p>}
-
+        <Card>
+          <CardHeader>
+            <CardTitle>POSTリクエスト</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <Input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="テキストを入力してください"
+              />
+              <Button 
+                type="submit"
+                disabled={isLoading.post || !input}
+                className="w-full"
+              >
+                {isLoading.post ? "送信中..." : (
+                  <span className="flex items-center gap-2">
+                    送信 <Send className="w-4 h-4" />
+                  </span>
+                )}
+              </Button>
+            </form>
+            {postResponse && (
+              <p className="mt-4 p-3 bg-slate-100 rounded-md">
+                Flaskからの応答: {postResponse}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
