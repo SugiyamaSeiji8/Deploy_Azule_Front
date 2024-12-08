@@ -6,7 +6,7 @@ export default function Home() {
   const [getResponse, setGetResponse] = useState('');
 
   const handleGetRequest = async () => {
-    const res = await fetch('http://localhost:5000/api/hello', {
+    const res = await fetch('https://tech0-gen-8-step3-testapp-py1-8.azurewebsites.net/api/hello', {
       method: 'GET',
     });
     const data = await res.json();
@@ -47,7 +47,7 @@ export default function Home() {
     //入力されたデータをコンソールに表示
     console.log("入力情報:", input);
 
-    const res = await fetch('http://localhost:5000/api/echo', {
+    const res = await fetch('https://tech0-gen-8-step3-testapp-py1-8.azurewebsites.net/api/echo', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
