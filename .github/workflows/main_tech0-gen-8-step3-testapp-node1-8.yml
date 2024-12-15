@@ -64,4 +64,4 @@ jobs:
           app-name: 'tech0-gen-8-step3-testapp-node1-8'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2EB7ACC299674697BC9A7D968FFAAA7B }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2EB7ACC299674697BC9A7D968FFAAA7B}}
